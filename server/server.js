@@ -12,6 +12,7 @@ const callRoutes = require('./routes/callRoutes');
 
 app.get('/', (req, res) => {
   res.send('Server running');
+  res.send('Server running');
 });
 
 app.use('/api', callRoutes);
