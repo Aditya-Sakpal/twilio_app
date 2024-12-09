@@ -1,10 +1,7 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Voice Calling App</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <ion-button (click)="makeCall()">Make Call</ion-button>
-  <ion-button color="danger" (click)="hangupCall()">Hang Up</ion-button>
-</ion-content>
+<div>
+  <ion-item>
+    <ion-input type="text" [(ngModel)]="phoneNumber" placeholder="Enter phone number"></ion-input>
+  </ion-item>
+  <ion-button expand="full" (click)="makeCall()">Call</ion-button>
+  <p>{{ callStatus }}</p>
+</div>

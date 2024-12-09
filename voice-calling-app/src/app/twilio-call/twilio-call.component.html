@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Twilio Call</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="call-container">
+    <!-- Phone number input field -->
+    <ion-item>
+      <ion-label position="floating">Phone Number</ion-label>
+      <ion-input [(ngModel)]="phoneNumber" type="text" placeholder="Enter phone number (with country code)"></ion-input>
+    </ion-item>
+
+    <!-- Call status display -->
+    <ion-item>
+      <ion-label>Status: </ion-label>
+      <ion-text>{{ callStatus }}</ion-text>
+    </ion-item>
+
+    <!-- Call control buttons -->
+    <ion-button expand="full" (click)="getToken()">Get Token</ion-button>
+    <ion-button expand="full" (click)="makeCall()" [disabled]="!phoneNumber">Call</ion-button>
+    <ion-button expand="full" (click)="disconnectCall()" [disabled]="!device">End Call</ion-button>
+  </div>
+</ion-content>

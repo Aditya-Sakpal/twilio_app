@@ -1,43 +1,64 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Device } from '@twilio/voice-sdk';
+import { environment } from 'src/environments/environment';
+import { interval } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
 })
 export class AppComponent {
-  device: Device | undefined;
+  phoneNumber: string = ''; 
+  callStatus: string = 'Ready to call';
+  callSid: string = '';
 
   constructor(private http: HttpClient) {}
 
-  async ngOnInit() {
-    const tokenResponse = await this.http.get<{ token: string }>('http://localhost:3000/token').toPromise();
-    if (!tokenResponse) return;
-    this.device = new Device(tokenResponse['token']);
-
-    this.device.on('incoming', (call) => {
-      // Handle incoming call
-      call.accept();
-    });
-
-    this.device.on('ready', () => console.log('Twilio Device Ready'));
-  }
-
-  async makeCall() {
-    if (!this.device) return;
-
-    const params = {
-      To: '+RECIPIENT_PHONE_NUMBER',
-    };
-
-    const call = await this.device.connect({ params });
-    call.on('disconnect', () => console.log('Call disconnected'));
-  }
-
-  hangupCall() {
-    if (this.device) {
-      this.device.disconnectAll();
+  makeCall() {
+    if (this.phoneNumber) {
+      const apiUrl = `${environment.apiUrl}/call`;
+      this.http
+        .post(apiUrl, { to: this.phoneNumber })
+        .subscribe(
+          (response: any) => {
+            this.callSid = response.callSid;
+            this.callStatus = 'Calling...';
+            console.log('Call initiated:', response);
+            // Start polling to check call status
+            this.pollCallStatus();
+          },
+          (error) => {
+            this.callStatus = 'Error initiating call';
+            console.error('Error:', error);
+          }
+        );
+    } else {
+      alert('Please enter a phone number');
     }
+  }
+
+  pollCallStatus() {
+    // Poll the backend every 5 seconds to check the call status
+    const pollInterval = interval(5000);
+    pollInterval.subscribe(() => {
+      this.checkCallStatus();
+    });
+  }
+
+  checkCallStatus() {
+    // Fetch the call status from the server
+    const statusUrl = `${environment.apiUrl}/call-status/${this.callSid}`;
+    this.http.get(statusUrl).subscribe(
+      (response: any) => {
+        console.log('Call status:', response);
+        if (response.status === 'completed') {
+          this.callStatus = 'Call ended';
+          console.log('Call ended');
+        }
+      },
+      (error) => {
+        console.error('Error fetching call status:', error);
+      }
+    );
   }
 }
